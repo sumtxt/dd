@@ -34,7 +34,7 @@ The command [`eventdd`](http://ftp.iza.org/dp13524.pdf) provides similar functio
 
 Their data is a balanced panel of vote shares from 4 elections covering 95 municipalities on islands in the Aegean Sea. Some islands close to the Turkish border experienced a sudden and drastic increase in the number of Syrian refugees before the 2016 elections. 
 
-The code below shows how `code_eventtime` is used to add a time-to-event variable to the data frame which is then used in the subsequent two-way fixed effect regression. Next, the estimates are extracted via `tidy_eventcoef` and passed to ggplot. 
+In code below, `code_eventtime` adds a time-to-event variable to the data frame which is then used in the subsequent two-way fixed effect regression. Next, the estimates are extracted via `tidy_eventcoef` and passed to ggplot. 
 
 ```{r, echo=TRUE, messages=FALSE}
 library(ggplot2)
@@ -70,14 +70,13 @@ ggplot(toplot, aes(eventtime,estimate)) +
 
 ### Staggered DiD Example 
 
-This example comes from [Stevenson and Wolfers (2006)](https://doi.org/10.1093/qje/121.1.267). The authors study how no-fault unilateral divorce reforms affect female suicide in United States. The panel includes 49 states between 1964 to 1996. Reforms in the states occur at different points in times which makes this a staggered difference-in-differences design. 
+This example comes from [Stevenson and Wolfers (2006)](https://doi.org/10.1093/qje/121.1.267). The authors study how no-fault unilateral divorce reforms affect female suicide in United States. The panel includes 49 states between 1964 to 1996. Reforms in the states occur at different points in time which makes this a staggered difference-in-differences design. 
 
 By default `code_eventtime` generates a time-to-event variable that leads to a saturated number of lags and leads. However, users can change this and accumulate leads and lags as demonstrated below. Users can also choose to use another baseline (reference period).
 
 
 ```{r, echo=TRUE, messages=FALSE}
 data(divorce)
-with(divorce, table(year, post))
 
 divorce$t <- code_eventtime(
          unit=stfips,
@@ -103,7 +102,10 @@ ggplot(toplot, aes(eventtime,estimate)) +
   geom_linerange(aes(ymin=conf.low, ymax=conf.high)) + 
   geom_hline(aes(yintercept=0),lty=2) + 
   theme_minimal() + xlab("Years to/from reform") + 
-  ylab("Estimate")
+  ylab("Estimate") + 
+  scale_x_continuous(
+    breaks=c(-10,0,10,20),
+    labels=c("-10","0","10","20+"))
 ```
 
 

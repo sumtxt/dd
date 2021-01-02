@@ -38,16 +38,15 @@ Their data is a balanced panel of vote shares from 4 elections covering
 the Turkish border experienced a sudden and drastic increase in the
 number of Syrian refugees before the 2016 elections.
 
-The code below shows how `code_eventtime` is used to add a time-to-event
-variable to the data frame which is then used in the subsequent two-way
-fixed effect regression. Next, the estimates are extracted via
-`tidy_eventcoef` and passed to ggplot.
+In code below, `code_eventtime` adds a time-to-event variable to the
+data frame which is then used in the subsequent two-way fixed effect
+regression. Next, the estimates are extracted via `tidy_eventcoef` and
+passed to ggplot.
 
 ``` r
 library(ggplot2)
 library(dd)
 library(lfe)
-#> Loading required package: Matrix
 
 data(goldendawn)
 with(goldendawn, table(year, post))
@@ -108,7 +107,7 @@ This example comes from [Stevenson and Wolfers
 (2006)](https://doi.org/10.1093/qje/121.1.267). The authors study how
 no-fault unilateral divorce reforms affect female suicide in United
 States. The panel includes 49 states between 1964 to 1996. Reforms in
-the states occur at different points in times which makes this a
+the states occur at different points in time which makes this a
 staggered difference-in-differences design.
 
 By default `code_eventtime` generates a time-to-event variable that
@@ -118,42 +117,6 @@ choose to use another baseline (reference period).
 
 ``` r
 data(divorce)
-with(divorce, table(year, post))
-#>       post
-#> year    0  1
-#>   1964 41  8
-#>   1965 41  8
-#>   1966 41  8
-#>   1967 41  8
-#>   1968 41  8
-#>   1969 39 10
-#>   1970 37 12
-#>   1971 30 19
-#>   1972 27 22
-#>   1973 17 32
-#>   1974 14 35
-#>   1975 12 37
-#>   1976 11 38
-#>   1977  8 41
-#>   1978  8 41
-#>   1979  8 41
-#>   1980  7 42
-#>   1981  7 42
-#>   1982  7 42
-#>   1983  7 42
-#>   1984  6 43
-#>   1985  5 44
-#>   1986  5 44
-#>   1987  5 44
-#>   1988  5 44
-#>   1989  5 44
-#>   1990  5 44
-#>   1991  5 44
-#>   1992  5 44
-#>   1993  5 44
-#>   1994  5 44
-#>   1995  5 44
-#>   1996  5 44
 
 divorce$t <- code_eventtime(
          unit=stfips,
@@ -179,7 +142,10 @@ ggplot(toplot, aes(eventtime,estimate)) +
   geom_linerange(aes(ymin=conf.low, ymax=conf.high)) + 
   geom_hline(aes(yintercept=0),lty=2) + 
   theme_minimal() + xlab("Years to/from reform") + 
-  ylab("Estimate")
+  ylab("Estimate") + 
+  scale_x_continuous(
+    breaks=c(-10,0,10,20),
+    labels=c("-10","0","10","20+"))
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
