@@ -1,0 +1,110 @@
+---
+title: dd - Tools to estimate difference-in-differences models with leads and lags in R
+output:
+  github_document:
+    html_preview: false
+---
+
+```{r, echo=FALSE, messages=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The `dd` package provides two effective helper functions to estimate and visualize a difference-in-differences model (DD) with leads and lags. Studies using such specifications are often referred to as (panel) event studies in economics. 
+
+The function `code_eventtime` generates a time-to-treatment factor variable which is broken out into dummies capturing leads and lags when added to a typical model fitting function in R (such as `lm` or `felm`). 
+
+The function `tidy_eventcoef` uses the `tidy` function family from the [`broom` package](https://broom.tidymodels.org/) to extract the coefficients for the leads and lags and prepares a data frame suitable to pass to `ggplot` for plotting.  
+
+To install the `dd` package, use: 
+
+```{r, eval = FALSE}
+remotes::install_github("sumtxt/dd")
+```
+
+The command [`eventdd`](http://ftp.iza.org/dp13524.pdf) provides similar functionality in Stata but bundled with code for model estimation (which this R package leaves up to the user for added flexibility).
+
+
+
+### Multi-period DiD Example 
+
+[Dinas, Matakos, Xefteris and Hangartner (2019)](https://doi.org/10.1017/pan.2018.48) show that the exposure to the European refugee protection crisis in 2015/16 increased support for the Golden Dawn, a radical right party in Greece. 
+
+Their data is a balanced panel of vote shares from 4 elections covering 95 municipalities on islands in the Aegean Sea. Some islands close to the Turkish border experienced a sudden and drastic increase in the number of Syrian refugees before the 2016 elections. 
+
+The code below shows how `code_eventtime` is used to add a time-to-event variable to the data frame which is then used in the subsequent two-way fixed effect regression. Next, the estimates are extracted via `tidy_eventcoef` and passed to ggplot. 
+
+```{r, echo=TRUE, messages=FALSE}
+library(ggplot2)
+library(dd)
+library(lfe)
+
+data(goldendawn)
+with(goldendawn, table(year, post))
+
+goldendawn$t <- code_eventtime(
+         unit=muni,
+         time=year,
+         treat=post,
+         data=goldendawn)
+
+m <- felm(gd ~ t | muni + year | 0 | muni, 
+  data=goldendawn)
+summary(m)
+
+toplot <- tidy_eventcoef(
+    model=m, 
+    varname="t",
+    conf.int=TRUE)
+
+ggplot(toplot, aes(eventtime,estimate)) + 
+  geom_point() + geom_line() + 
+  geom_linerange(aes(ymin=conf.low, ymax=conf.high)) + 
+  geom_hline(aes(yintercept=0),lty=2) + 
+  theme_minimal() + xlab("Years to 2016 election") + 
+  ylab("Estimate")
+```
+
+
+### Staggered DiD Example 
+
+This example comes from [Stevenson and Wolfers (2006)](https://doi.org/10.1093/qje/121.1.267). The authors study how no-fault unilateral divorce reforms affect female suicide in United States. The panel includes 49 states between 1964 to 1996. Reforms in the states occur at different points in times which makes this a staggered difference-in-differences design. 
+
+By default `code_eventtime` generates a time-to-event variable that leads to a saturated number of lags and leads. However, users can change this and accumulate leads and lags as demonstrated below. Users can also choose to use another baseline (reference period).
+
+
+```{r, echo=TRUE, messages=FALSE}
+data(divorce)
+with(divorce, table(year, post))
+
+divorce$t <- code_eventtime(
+         unit=stfips,
+         time=year,
+         treat=post,
+         data=divorce, 
+         leads=10, 
+         lags=20,
+         baseline=-1)
+
+ff <- asmrs ~ t + pcinc + asmrh + cases | stfips + year | 0 | stfips
+
+m <- felm(ff, data=divorce)
+
+toplot <- tidy_eventcoef(
+  model=m, 
+  varname="t", 
+  baseline=-1, 
+  conf.int=TRUE)
+
+ggplot(toplot, aes(eventtime,estimate)) + 
+  geom_point() + geom_line() + 
+  geom_linerange(aes(ymin=conf.low, ymax=conf.high)) + 
+  geom_hline(aes(yintercept=0),lty=2) + 
+  theme_minimal() + xlab("Years to/from reform") + 
+  ylab("Estimate")
+```
+
+
+

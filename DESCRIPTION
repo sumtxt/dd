@@ -1,0 +1,20 @@
+Package: dd
+Title: Tools to estimate difference-in-differences models with leads and 
+Version: 0.0.1
+Author: Moritz Marbach <moritz.marbach@gess.ethz.ch> [aut, cre]
+Maintainer: Moritz Marbach <moritz.marbach@gess.ethz.ch>
+Description: 
+License: GPL-3
+Encoding: UTF-8
+BugReports: https://github.com/sumtxt/dd/issues
+URL: https://github.com/sumtxt/dd
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports:
+    broom
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    ggplot2,
+    lfe
