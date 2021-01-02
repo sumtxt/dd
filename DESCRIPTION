@@ -1,9 +1,9 @@
 Package: dd
-Title: Tools to estimate difference-in-differences models with leads and 
+Title: Tools to estimate difference-in-differences models with leads and lags in R
 Version: 0.0.1
 Author: Moritz Marbach <moritz.marbach@gess.ethz.ch> [aut, cre]
 Maintainer: Moritz Marbach <moritz.marbach@gess.ethz.ch>
-Description: 
+Description: This package provides two effective helper functions to estimate and visualize a difference-in-differences model (DD) with leads and lags. Studies using such specifications are often referred to as (panel) event studies in economics. 
 License: GPL-3
 Encoding: UTF-8
 BugReports: https://github.com/sumtxt/dd/issues
